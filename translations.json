@@ -1,0 +1,20 @@
+{
+  "en": {
+    "welcome": "Welcome! Click the button below to see the menu.",
+    "show_menu": "Show Menu",
+    "option1": "Option 1",
+    "option2": "Option 2"
+  },
+  "ru": {
+    "welcome": "Добро пожаловать! Нажмите кнопку ниже, чтобы увидеть меню.",
+    "show_menu": "Показать меню",
+    "option1": "Опция 1",
+    "option2": "Опция 2"
+  },
+  "uk": {
+    "welcome": "Ласкаво просимо! Натисніть кнопку нижче, щоб побачити меню.",
+    "show_menu": "Показати меню",
+    "option1": "Опція 1",
+    "option2": "Опція 2"
+  }
+}
