@@ -4,14 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@michpl/telegram-calendar": "^1.1.0",
+    "axios": "^1.7.7",
     "dotenv": "^16.4.5",
+    "fuse.js": "^7.0.0",
     "googleapis": "^144.0.0",
-    "telegraf": "^4.16.3"
+    "papaparse": "^5.4.1",
+    "telegraf": "^4.16.3",
+    "telegraf-calendar-telegram": "^2.0.2",
+    "telegraf-i18n": "^6.6.0"
   }
 }
