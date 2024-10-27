@@ -1,20 +1,17 @@
-# Use the official Node.js image.
-FROM node:18
+# Assuming you're using a Node.js image
+FROM node:14
 
-# Set the working directory.
+# Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json.
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies with force.
-RUN npm install --force
+# Install dependencies with legacy peer deps
+RUN npm ci --legacy-peer-deps
 
-# Copy the rest of your application files.
+# Copy the rest of your application
 COPY . .
 
-# Expose the port your app runs on.
-EXPOSE 3000
-
-# Start the application.
-CMD ["npm", "start"]
+# Run your application (this may vary)
+CMD ["node", "start"]
