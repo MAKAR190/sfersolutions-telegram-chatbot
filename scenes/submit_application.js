@@ -4,7 +4,10 @@ const { backKeyboard } = require("../utils/keyboards");
 const { getCalendar } = require("../calendar");
 const { GOOGLE_SHEET_ID } = require("../config/config");
 const handleCommand = require("../handlers/handleCommand");
-const { checkUserIdExists } = require("../services/googleSheets");
+const {
+  checkUserIdExists,
+  updateStartDateById,
+} = require("../services/googleSheets");
 const Papa = require("papaparse");
 const fs = require("fs");
 
@@ -667,7 +670,6 @@ const questionnaireScene = new Scenes.WizardScene(
             .oneTime()
             .resize().reply_markup,
         });
-        ;
         return ctx.wizard.next();
       }
     }
@@ -691,18 +693,18 @@ const questionnaireScene = new Scenes.WizardScene(
     });
     return ctx.wizard.next();
   },
-
   async (ctx) => {
     if (await handleCommand(ctx)) return;
     if (ctx.message) {
       if (ctx.message.text === ctx.i18n.t("go_back")) {
         return handleGoBack(ctx);
       }
-
       ctx.session.notReadyAreas = ctx.message.text;
     }
-    ctx.session.selectTime = false;
+
+    ctx.session.selectTime = false; // This indicates we are in the start date selection phase
     const calendar = getCalendar();
+
     // Ask for the start date
     await ctx.reply(ctx.i18n.t("questionnaire.start_date"), {
       parse_mode: "HTML",
@@ -711,23 +713,19 @@ const questionnaireScene = new Scenes.WizardScene(
 
     return ctx.wizard.next(); // Move to the next step
   },
+
   async (ctx) => {
     if (await handleCommand(ctx)) return;
-    ctx.session.selectTime = true;
+    ctx.session.selectTime = true; // Now we are in the time selection phase
     const calendar = getCalendar();
 
-    // Here you might want to save the selected date to `startDate`
-    if (ctx.session.startDate) {
-      ctx.session.dateToMeet = ctx.session.startDate; // Save dateToMeet as the selected start date
-      delete ctx.session.startDate; // Ensure startDate is cleared after using it
-    }
-
+    // Reply with the message for dateToMeet using the calendar for the time selection
     await ctx.reply(ctx.i18n.t("contact_recruiter_message"), {
       parse_mode: "HTML",
       reply_markup: calendar.getCalendar().reply_markup,
     });
 
-    // You might want to leave the scene here or proceed with other steps
+    // Leave the scene or proceed with other steps if required
     return ctx.scene.leave();
   }
 );

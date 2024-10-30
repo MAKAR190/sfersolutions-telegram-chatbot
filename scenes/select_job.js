@@ -418,16 +418,24 @@ async function displayVacancies(ctx) {
         const rate = vacancy.rate || "Rate not specified";
         const schedule = vacancy.schedule || "Schedule not specified";
         const tasks = vacancy.tasks || "Tasks not specified";
+        let additionalInfo = "";
 
-        const additionalOne =
-          "\n - Housing: " +
-          (vacancy.additionalOne || "Additional info not specified");
-        const additionalTwo =
-          "\n - Transport: " + (vacancy.additionalTwo || "");
-        const additionalThree =
-          "\n - Meals: " + (vacancy.additionalThree || "");
-        const additionalFour =
-          "\n - Uniform: " + (vacancy.additionalFour || "");
+        // Check each additional field and append it to the additionalInfo string if it exists
+        if (vacancy.additionalOne) {
+          additionalInfo += "\n - Housing: " + vacancy.additionalOne;
+        }
+
+        if (vacancy.additionalTwo) {
+          additionalInfo += "\n - Transport: " + vacancy.additionalTwo;
+        }
+
+        if (vacancy.additionalThree) {
+          additionalInfo += "\n - Meals: " + vacancy.additionalThree;
+        }
+
+        if (vacancy.additionalFour) {
+          additionalInfo += "\n - Uniform: " + vacancy.additionalFour;
+        }
 
         const shiftInfo = [
           vacancy.day === "y" ? "\n- Day shifts" : "",
@@ -448,7 +456,7 @@ async function displayVacancies(ctx) {
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Tasks</b>: ${tasks}
-➕ <b>Additional</b>: ${additionalOne} ${additionalTwo} ${additionalThree} ${additionalFour} \n
+➕ <b>Additional</b>: ${additionalInfo} \n
 ___________________________________________`;
       })
       .join("\n\n");
@@ -470,15 +478,24 @@ ___________________________________________`;
         const rate = vacancy.rate || "Ставка не указана";
         const schedule = vacancy.schedule || "График не указан";
         const tasks = vacancy.tasks || "Задачи не указаны";
-        const additionalOne =
-          "\n - Жилье: " +
-          (vacancy.additionalOne || "Дополнительно не указано");
-        const additionalTwo = "\n - Довоз: " + (vacancy.additionalTwo || "");
-        const additionalThree =
-          "\n - Обеды: " + (vacancy.additionalThree || "");
-        const additionalFour =
-          "\n - Униформа: " + (vacancy.additionalFour || "");
+        let additionalInfo = "";
 
+        // Check each additional field and append it to the additionalInfo string if it exists
+        if (vacancy.additionalOne) {
+          additionalInfo += "\n - Жилье: " + vacancy.additionalOne;
+        }
+
+        if (vacancy.additionalTwo) {
+          additionalInfo += "\n - Довоз: " + vacancy.additionalTwo;
+        }
+
+        if (vacancy.additionalThree) {
+          additionalInfo += "\n - Обеды: " + vacancy.additionalThree;
+        }
+
+        if (vacancy.additionalFour) {
+          additionalInfo += "\n - Униформа: " + vacancy.additionalFour;
+        }
         const shiftInfo = [
           vacancy.day === "y" ? "\n- Дневные" : "",
           vacancy.night === "y" ? "\n- Ночные" : "",
@@ -498,7 +515,7 @@ ___________________________________________`;
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Задачи</b>: ${tasks}
-➕ <b>Дополнительно</b>: ${additionalOne} ${additionalTwo} ${additionalThree} ${additionalFour} \n
+➕ <b>Дополнительно</b>: ${additionalInfo} \n
 ___________________________________________`;
       })
       .join("\n\n");
@@ -520,13 +537,24 @@ ___________________________________________`;
         const rate = vacancy.rate || "Ставка не вказана";
         const schedule = vacancy.schedule || "Розклад не вказано";
         const tasks = vacancy.tasks || "Завдання не вказано";
-        const additionalOne =
-          "\n - Житло: " + (vacancy.additionalOne || "Не вказано");
-        const additionalTwo = "\n - Доставка: " + (vacancy.additionalTwo || "");
-        const additionalThree =
-          "\n - Обіди: " + (vacancy.additionalThree || "");
-        const additionalFour =
-          "\n - Уніформа: " + (vacancy.additionalFour || "");
+        let additionalInfo = "";
+
+        // Check each additional field and append it to the additionalInfo string if it exists
+        if (vacancy.additionalOne) {
+          additionalInfo += "\n - Житло: " + vacancy.additionalOne;
+        }
+
+        if (vacancy.additionalTwo) {
+          additionalInfo += "\n - Доставка: " + vacancy.additionalTwo;
+        }
+
+        if (vacancy.additionalThree) {
+          additionalInfo += "\n - Обіди: " + vacancy.additionalThree;
+        }
+
+        if (vacancy.additionalFour) {
+          additionalInfo += "\n - Уніформа: " + vacancy.additionalFour;
+        }
 
         const shiftInfo = [
           vacancy.day === "y" ? "\n- Денна" : "",
@@ -547,7 +575,7 @@ ___________________________________________`;
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Завдання</b>: ${tasks}
-➕ <b>Додатково</b>: ${additionalOne} ${additionalTwo} ${additionalThree} ${additionalFour} \n
+➕ <b>Додатково</b>: ${additionalInfo}  \n
 ___________________________________________`;
       })
       .join("\n\n");

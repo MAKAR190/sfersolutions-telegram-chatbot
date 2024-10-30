@@ -42,7 +42,7 @@ const questionnaireScene = new Scenes.WizardScene(
     delete ctx.session.notReadyAreas;
     delete ctx.session.startDate;
     delete ctx.session.contactProcess;
-    delete ctx.session.startDate;
+    delete ctx.session.dateToMeet;
     delete ctx.session.skipped;
 
     return ctx.scene.leave();

@@ -10,7 +10,7 @@ const viewAllJobsScene = require("./scenes/view_all_jobs");
 const selectJobScene = require("./scenes/select_job");
 const applyScene = require("./scenes/applyScene");
 const { TELEGRAM_TOKEN } = require("./config/config");
-const { initializeCalendar } = require("./calendar");
+const { initializeCalendars } = require("./calendar");
 
 const i18n = new TelegrafI18n({
   defaultLanguage: "en",
@@ -33,7 +33,7 @@ const stage = new Scenes.Stage([
 ]);
 
 bot.use(stage.middleware());
-initializeCalendar(bot);
+initializeCalendars(bot);
 
 bot.start((ctx) => ctx.scene.enter("startScene"));
 bot.hears(match("main_menu.change_language"), (ctx) =>
