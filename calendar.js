@@ -183,6 +183,8 @@ const initializeCalendar = (bot) => {
       await ctx.reply(ctx.i18n.t("questionnaire.thank_you"), {
         parse_mode: "HTML",
       });
+      
+      await ctx.reply("@makkentoshh");
 
       if (ctx.session.selectTime) {
         ctx.session.selectTime = false;
