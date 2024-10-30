@@ -7,6 +7,8 @@ WORKDIR /app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
+COPY sfersolutions-7cf634c130f3.json sfersolutions-7cf634c130f3.json
+
 # Install dependencies with legacy peer dependencies
 RUN npm install --legacy-peer-deps
 
