@@ -9,7 +9,9 @@ const { mainKeyboard } = require("../utils/keyboards");
 const { getCalendar } = require("../calendar");
 const handleCommand = require("../handlers/handleCommand");
 const VACANCIES_PER_PAGE = 4;
-
+function areKeyboardsEqual(keyboard1, keyboard2) {
+  return JSON.stringify(keyboard1) === JSON.stringify(keyboard2);
+}
 const viewVacanciesScene = new Scenes.WizardScene(
   "view_all_jobs_scene",
 
@@ -94,11 +96,11 @@ const viewVacanciesScene = new Scenes.WizardScene(
     } else if (response === ctx.i18n.t("no")) {
       await fetchAndDisplayVacancies(ctx, "by_city", ctx.session.cities);
     } else {
-      await ctx.reply(ctx.i18n.t("invalid_response"), {
+      await ctx.reply(ctx.i18n.t("invalid_yes_or_no"), {
         parse_mode: "HTML",
-        reply_markup: mainKeyboard(ctx).reply_markup,
       });
-      return ctx.scene.leave();
+      ctx.wizard.cursor -= 1;
+      return ctx.wizard.steps[ctx.wizard.cursor](ctx);
     }
   }
 );
@@ -422,21 +424,48 @@ ___________________________________________`;
   ]);
 
   if (ctx.callbackQuery) {
-    const newMessageContent =
+    const action = ctx.callbackQuery.data; // Access action directly from callback data
+
+    // If the action starts with "apply_", do not edit the message
+    if (action.startsWith("apply_")) {
+      console.log("Skipping message edit for action:", action);
+      return; // Exit early, no further action needed
+    }
+
+    const currentMessageText = ctx.callbackQuery.message.text;
+    const currentReplyMarkup = ctx.callbackQuery.message.reply_markup;
+
+    // Determine the new message text based on the session language
+    const newMessageText =
       ctx.session.language === "ua"
         ? messageUA
         : ctx.session.language === "ru"
         ? messageRU
         : message;
 
-    // Only edit message if the content has changed
-    if (ctx.callbackQuery.message.text !== newMessageContent) {
-      await ctx.editMessageText(
-        newMessageContent,
-        Markup.inlineKeyboard(inlineKeyboard)
-      );
+    // Create a new reply markup for the inline keyboard
+    const newReplyMarkup = Markup.inlineKeyboard(inlineKeyboard).reply_markup;
+
+    // Check if message text or reply markup has changed
+    const textChanged = currentMessageText !== newMessageText;
+    const markupChanged = !areKeyboardsEqual(
+      currentReplyMarkup,
+      newReplyMarkup
+    );
+
+    // Proceed with editing only if there's a change
+    if (textChanged || markupChanged) {
+      try {
+        await ctx.editMessageText(newMessageText, {
+          parse_mode: "HTML",
+          reply_markup: newReplyMarkup,
+        });
+      } catch (error) {
+        console.error("Failed to edit message:", error);
+      }
     }
   } else {
+    // Send a new message if it's not a callback query
     await ctx.reply(
       ctx.session.language === "ua"
         ? messageUA
@@ -447,10 +476,6 @@ ___________________________________________`;
         parse_mode: "HTML",
         reply_markup: Markup.inlineKeyboard(inlineKeyboard).reply_markup,
       }
-    );
-    await ctx.reply(
-      ctx.i18n.t("vacancies.middle_message"),
-      Markup.removeKeyboard()
     );
   }
 }
@@ -470,9 +495,7 @@ viewVacanciesScene.action(/prev|next|apply_\d+|menu/, async (ctx) => {
     ctx.session.selectedVacancy = ctx.session.vacancies[vacancyIndex];
     ctx.session.applying = true;
 
-    await ctx.reply(ctx.i18n.t("application.ask_full_name"), {
-      parse_mode: "HTML",
-    });
+    ctx.scene.enter("applyScene");
   } else if (action === "menu") {
     await ctx.reply(ctx.i18n.t("main_menu.prompt"), {
       parse_mode: "HTML",
@@ -484,52 +507,4 @@ viewVacanciesScene.action(/prev|next|apply_\d+|menu/, async (ctx) => {
   await displayVacancies(ctx);
 });
 
-viewVacanciesScene.on("message", async (ctx, next) => {
-  if (ctx.session.applying) {
-    if (!ctx.session.fullName) {
-      ctx.session.fullName = ctx.message.text;
-      await ctx.reply(ctx.i18n.t("application.ask_phone"), {
-        parse_mode: "HTML",
-        reply_markup: Markup.keyboard([
-          [
-            Markup.button.contactRequest(
-              ctx.i18n.t("questionnaire.share_contact")
-            ),
-          ],
-        ])
-          .resize()
-          .oneTime().reply_markup,
-      });
-    } else if (!ctx.session.phoneNumber) {
-      if (ctx.message.contact && ctx.message.contact.phone_number) {
-        ctx.session.phoneNumber = ctx.message.contact.phone_number;
-      } else if (ctx.message.text) {
-        ctx.session.phoneNumber = ctx.message.text;
-      } else {
-        await ctx.reply(ctx.i18n.t("invalid response"), { parse_mode: "HTML" }); // Removed scene.leave()
-        return; // allow reattempt
-      }
-      await ctx.reply(ctx.i18n.t("application.ask_relocation"), {
-        parse_mode: "HTML",
-        reply_markup: Markup.keyboard([[ctx.i18n.t("yes"), ctx.i18n.t("no")]])
-          .resize()
-          .oneTime().reply_markup,
-      });
-    } else if (!ctx.session.relocationReadiness) {
-      ctx.session.relocationReadiness = ctx.message.text;
-
-      const calendar = getCalendar();
-      await ctx.reply(ctx.i18n.t("questionnaire.start_date"), {
-        parse_mode: "HTML",
-        reply_markup: calendar.getCalendar().reply_markup,
-      });
-
-      return ctx.scene.leave();
-    } else {
-      next();
-    }
-  } else {
-    next();
-  }
-});
 module.exports = viewVacanciesScene;

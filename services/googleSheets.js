@@ -232,7 +232,7 @@ const normalizeCityName = (city) => {
 
 const getVacanciesByCity = async (spreadsheetId, cities, language) => {
   try {
-    const sheets = google.sheets({ version: "v4", auth });
+    const sheets = google.sheets({ version: "v4", auth }); // Ensure `auth` is defined
 
     // Determine the ranges based on the language
     let allVacanciesRange;
@@ -319,12 +319,20 @@ const getVacanciesByCity = async (spreadsheetId, cities, language) => {
       const normalizedCity = normalizeCityName(city);
 
       return normalizedDataCities.filter((vacancy) => {
-        const vacancyCity = vacancy.normalizedCity;
+        const normalizedVacancyCity = vacancy.normalizedCity;
 
-        // Check for exact match or one-letter mismatch
+        // Matching logic
         return (
-          vacancyCity === normalizedCity ||
-          oneLetterMismatch(vacancyCity, normalizedCity)
+          // Exact match
+          normalizedVacancyCity === normalizedCity ||
+          // Check if the first three letters match
+          normalizedVacancyCity.slice(0, 3) === normalizedCity.slice(0, 3) ||
+          // Check if the normalized city name is part of the vacancy's city name
+          normalizedVacancyCity.includes(normalizedCity) ||
+          normalizedCity.includes(normalizedVacancyCity) ||
+          // Check if the first three letters are the same
+          normalizedVacancyCity.startsWith(normalizedCity.slice(0, 3)) ||
+          normalizedCity.startsWith(normalizedVacancyCity.slice(0, 3))
         );
       });
     });
@@ -335,23 +343,6 @@ const getVacanciesByCity = async (spreadsheetId, cities, language) => {
     return [];
   }
 };
-
-const oneLetterMismatch = (str1, str2) => {
-  if (Math.abs(str1.length - str2.length) > 1) return false;
-
-  let mismatchCount = 0;
-  const minLength = Math.min(str1.length, str2.length);
-
-  for (let i = 0; i < minLength; i++) {
-    if (str1[i] !== str2[i]) {
-      mismatchCount++;
-      if (mismatchCount > 1) return false;
-    }
-  }
-
-  return true;
-};
-
 const getVacanciesByJobOfferings = async (
   spreadsheetId,
   workHours,

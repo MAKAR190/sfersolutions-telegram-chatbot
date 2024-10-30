@@ -5,12 +5,22 @@ const {
   appendToSheet,
   updateStartDateById,
 } = require("./services/googleSheets");
+
 let calendar;
 
 const initializeCalendar = (bot) => {
   calendar = new Calendar(bot);
-  calendar.setDateListener(async (context, date) => {
-    context.session.startDate = date;
+
+  calendar.setDateListener(async (ctx, date) => {
+    // Check if startDate is already set, if not, assign the new date
+    if (!ctx.session.startDate) {
+      ctx.session.startDate = date; // Set startDate only once
+      console.log("startDate set to:", ctx.session.startDate);
+    } else {
+      console.log("startDate already set:", ctx.session.startDate);
+    }
+
+    // Prepare the time selection keyboard
     const hours = Array.from(
       { length: 9 },
       (_, i) => (i + 9).toString().padStart(2, "0") + ":00"
@@ -24,17 +34,24 @@ const initializeCalendar = (bot) => {
       inlineKeyboard.push(keyboard.slice(i, i + 3));
     }
 
-    await context.reply(context.i18n.t("questionnaire.select_time"), {
-      parse_mode: "HTML",
-      reply_markup: Markup.inlineKeyboard(inlineKeyboard).reply_markup,
-    });
+    // Send a reply if selectTime is set
+    if (ctx.session.selectTime) {
+      await ctx.reply(ctx.i18n.t("contact_recruiter_message"), {
+        parse_mode: "HTML",
+        reply_markup: Markup.inlineKeyboard(inlineKeyboard).reply_markup,
+      });
+    }
 
-    const recruiterUsername = 856647351;
+    // Listen for time selection
     bot.action(/^time_(\d{2}:\d{2})$/, async (ctx) => {
-      context.session.startTime = ctx.match[1];
-      await ctx.answerCbQuery();
+      const selectedTime = ctx.match[1];
 
-      await ctx.reply(context.i18n.t("questionnaire.selected_date"), {
+      // Assign selected time and date for the meeting
+      ctx.session.startTime = selectedTime;
+      ctx.session.dateToMeet = date; // Set dateToMeet separately
+
+      await ctx.answerCbQuery();
+      await ctx.reply(ctx.i18n.t("questionnaire.selected_date"), {
         parse_mode: "HTML",
         reply_markup: Markup.keyboard([
           [
@@ -49,18 +66,22 @@ const initializeCalendar = (bot) => {
         ]).oneTime().reply_markup,
       });
 
-      if (ctx.session.applying) {
-        const messageToRecruiter = `
-    📢 Новий кандидат подав заявку на вакансію:
+      const recruiterUsername = 856647351; // Ensure this is a valid username
+      if (ctx.session.applying && ctx.session.selectTime) {
+        const messageToRecruiter = `📢 Новий кандидат подав заявку на вакансію:
     📝 Назва вакансії: ${
       ctx.session.selectedVacancy.title || ctx.session.selectedVacancy[0] || ""
     }, ${ctx.session.selectedVacancy.location || ctx.session.selectedVacancy[4]}
     👤 Ім'я: ${ctx.session.fullName}, @${ctx.from.username}
     📞 Номер телефону: ${ctx.session.phoneNumber}
     🚚 Готовність до переїзду: ${ctx.session.relocationReadiness}
-    📅 Дата та час зустрічі: ${ctx.session.startDate}, ${ctx.session.startTime}
+    📅 Готовий почати з: ${ctx.session.startDate}
+    📅 Дата та час для зв'язку: ${ctx.session.dateToMeet}, ${selectedTime}
 `;
         await ctx.telegram.sendMessage(recruiterUsername, messageToRecruiter);
+
+        // Debugging message
+        console.log("Message sent to recruiter:", messageToRecruiter);
 
         await ctx.reply(ctx.i18n.t("application.application_received"), {
           parse_mode: "HTML",
@@ -78,12 +99,13 @@ const initializeCalendar = (bot) => {
         });
 
         ctx.session.applying = false;
+        ctx.session.skipped = false;
         delete ctx.session.selectedVacancy;
         delete ctx.session.fullName;
         delete ctx.session.phoneNumber;
         delete ctx.session.relocationReadiness;
-        delete ctx.session.startDate;
         delete ctx.session.startTime;
+        // Optionally retain startDate if needed
         return;
       }
 
@@ -97,11 +119,11 @@ const initializeCalendar = (bot) => {
         numberOfPeople,
         notReadyAreas,
         relocate,
-      } = context.session;
+      } = ctx.session;
 
       const rowData = [
-        context.from.id,
-        "@" + context.from.username,
+        ctx.from.id,
+        "@" + ctx.from.username,
         phoneNumber,
         fullName,
         age,
@@ -111,12 +133,12 @@ const initializeCalendar = (bot) => {
         relocate,
         numberOfPeople,
         notReadyAreas,
-        `${context.session.startDate} ${context.session.startTime}`,
+        `${ctx.session.startDate} ${selectedTime}`,
       ];
 
-      const messageToRecruiter = !context.session.skipped
-        ? `
-📋 Нові дані про кандидата:\n
+      if (!ctx.session.applying && ctx.session.selectTime) {
+        const messageToRecruiter = !ctx.session.skipped
+          ? `📋 Нові дані про кандидата:\n
 - 👤 Повне ім'я: ${fullName}, @${ctx.from.username}
 - 📞 Номер телефону: ${phoneNumber}
 - 🎂 Вік: ${age}
@@ -125,30 +147,46 @@ const initializeCalendar = (bot) => {
 - 🌆 Місто пошуку роботи: ${city}, Готовий до переїзду: ${relocate}
 - 👥 Кількість людей (якщо застосовується): ${numberOfPeople}
 - 🚫 Не готовий працювати в: ${notReadyAreas}
-- 📅 Готовий почати з: ${context.session.startDate}, ${context.session.startTime}
+- 📅 Готовий почати з: ${ctx.session.startDate},
+- 📅 Дата та час для зв'язку: ${ctx.session.dateToMeet}, ${selectedTime}
 `
-        : `
-📋 Нова запланована зустрія з кандидатом, який вже був зареєстрований:\n
+          : `📋 Нова запланована зустріч з кандидатом, який вже був зареєстрований:\n
 - Нік: @${ctx.from.username}
-- 📅 Готовий почати з: ${context.session.startDate} ${context.session.startTime}
+📅 Дата та час для зв'язку: ${ctx.session.dateToMeet}, ${selectedTime}
 `;
+        await ctx.telegram.sendMessage(recruiterUsername, messageToRecruiter);
 
-      await ctx.telegram.sendMessage(recruiterUsername, messageToRecruiter);
+        // Debugging message
+        console.log("Message sent to recruiter:", messageToRecruiter);
+      }
 
-      if (context.session.skipped) {
-        context.session.skipped = false;
+      if (ctx.session.skipped) {
+        ctx.session.skipped = false;
         await updateStartDateById(
           GOOGLE_SHEET_ID,
           ctx.from.id,
-          `${context.session.startDate} ${context.session.startTime}`
+          `${ctx.session.startDate} ${selectedTime}`
+        );
+        console.log(
+          "Updated start date in Google Sheets for user:",
+          ctx.from.id
         );
       } else {
         await appendToSheet(GOOGLE_SHEET_ID, ctx.from.id, rowData);
+        console.log(
+          "Data appended to Google Sheets for user:",
+          ctx.from.id,
+          rowData
+        );
       }
 
-      await ctx.reply(context.i18n.t("questionnaire.thank_you"), {
+      await ctx.reply(ctx.i18n.t("questionnaire.thank_you"), {
         parse_mode: "HTML",
       });
+
+      if (ctx.session.selectTime) {
+        ctx.session.selectTime = false;
+      }
 
       if (!ctx.session.contactProcess) return;
       ctx.scene.enter("contact_recruiter_scene");

@@ -109,5 +109,8 @@
     "invalid_age": "Please enter a valid age (e.g., 18, 25). ⚠️"
   },
   "yes": "Yes ✅",
-  "no": "No ❌"
+  "no": "No ❌",
+  "invalid_phone_number": "The phone number you entered is invalid. Please enter a valid phone number.",
+  "contact_recruiter_message": "When would it be convenient for our recruiter to contact you?",
+  "invalid_yes_or_no": "Invalid Answer. Choose 'Yes' or 'No'"
 }

@@ -297,12 +297,14 @@ const questionnaireScene = new Scenes.WizardScene(
     if (ctx.message && ctx.message.text) {
       if (ctx.message.text === ctx.i18n.t("questionnaire.yes")) {
         ctx.session.skipped = true;
+        ctx.session.selectTime = true;
 
         await ctx.reply(ctx.i18n.t("questionnaire.skip_success"), {
           parse_mode: "HTML",
           reply_markup: getCalendar().getCalendar().reply_markup,
         });
         ctx.session.contactProcess = false;
+        delete ctx.session.startDate;
 
         return ctx.scene.leave();
       } else if (ctx.message.text === ctx.i18n.t("questionnaire.no")) {
@@ -337,14 +339,28 @@ const questionnaireScene = new Scenes.WizardScene(
   },
 
   async (ctx) => {
+    const phoneNumberRegex =
+      /^\+?\d{1,3}[\s-]?(\(?\d{1,4}\)?[\s-]?)*\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,4}$/;
+
     if (await handleCommand(ctx)) return;
+
     if (ctx.message) {
       if (ctx.message.contact) {
         ctx.session.phoneNumber = ctx.message.contact.phone_number;
       } else if (ctx.message.text === ctx.i18n.t("go_back")) {
         return handleGoBack(ctx);
       } else {
-        ctx.session.phoneNumber = ctx.message.text;
+        const enteredPhoneNumber = ctx.message.text;
+
+        if (!phoneNumberRegex.test(enteredPhoneNumber)) {
+          await ctx.reply(ctx.i18n.t("invalid_phone_number"), {
+            parse_mode: "HTML",
+          });
+          ctx.wizard.back();
+          return ctx.wizard.steps[ctx.wizard.cursor](ctx);
+        }
+
+        ctx.session.phoneNumber = enteredPhoneNumber;
       }
     }
 
@@ -651,6 +667,8 @@ const questionnaireScene = new Scenes.WizardScene(
             .oneTime()
             .resize().reply_markup,
         });
+        ;
+        return ctx.wizard.next();
       }
     }
   },
@@ -683,13 +701,33 @@ const questionnaireScene = new Scenes.WizardScene(
 
       ctx.session.notReadyAreas = ctx.message.text;
     }
-
+    ctx.session.selectTime = false;
     const calendar = getCalendar();
+    // Ask for the start date
     await ctx.reply(ctx.i18n.t("questionnaire.start_date"), {
       parse_mode: "HTML",
       reply_markup: calendar.getCalendar().reply_markup,
     });
 
+    return ctx.wizard.next(); // Move to the next step
+  },
+  async (ctx) => {
+    if (await handleCommand(ctx)) return;
+    ctx.session.selectTime = true;
+    const calendar = getCalendar();
+
+    // Here you might want to save the selected date to `startDate`
+    if (ctx.session.startDate) {
+      ctx.session.dateToMeet = ctx.session.startDate; // Save dateToMeet as the selected start date
+      delete ctx.session.startDate; // Ensure startDate is cleared after using it
+    }
+
+    await ctx.reply(ctx.i18n.t("contact_recruiter_message"), {
+      parse_mode: "HTML",
+      reply_markup: calendar.getCalendar().reply_markup,
+    });
+
+    // You might want to leave the scene here or proceed with other steps
     return ctx.scene.leave();
   }
 );
@@ -710,6 +748,8 @@ questionnaireScene.hears(match("cancel"), (ctx) => {
       [Markup.button.text(ctx.i18n.t("main_menu.change_language"))],
     ]).oneTime().reply_markup,
   });
+
+  delete ctx.session.startDate;
 
   return ctx.scene.leave();
 });

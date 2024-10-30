@@ -8,6 +8,7 @@ const questionnaireScene = require("./scenes/contact_recruiter");
 const submitScene = require("./scenes/submit_application");
 const viewAllJobsScene = require("./scenes/view_all_jobs");
 const selectJobScene = require("./scenes/select_job");
+const applyScene = require("./scenes/applyScene");
 const { TELEGRAM_TOKEN } = require("./config/config");
 const { initializeCalendar } = require("./calendar");
 
@@ -28,6 +29,7 @@ const stage = new Scenes.Stage([
   submitScene,
   selectJobScene,
   viewAllJobsScene,
+  applyScene,
 ]);
 
 bot.use(stage.middleware());
