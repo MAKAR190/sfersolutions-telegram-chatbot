@@ -123,7 +123,7 @@ const initializeCalendar = (bot) => {
 
       const rowData = [
         ctx.from.id,
-        "@" + ctx.from.username,
+        ctx.from.username ? "@" + ctx.from.username : "No Username",
         phoneNumber,
         fullName,
         age,
@@ -151,7 +151,8 @@ const initializeCalendar = (bot) => {
 - 📅 Дата та час для зв'язку: ${ctx.session.dateToMeet}, ${selectedTime}
 `
           : `📋 Нова запланована зустріч з кандидатом, який вже був зареєстрований:\n
-- Нік: @${ctx.from.username}
+- Нік:${ctx.from.username ? "@" + ctx.from.username : "No Username"},
+- ID в гугл таблиці: ${ctx.from.id}
 📅 Дата та час для зв'язку: ${ctx.session.dateToMeet}, ${selectedTime}
 `;
         await ctx.telegram.sendMessage(recruiterUsername, messageToRecruiter);
@@ -183,7 +184,7 @@ const initializeCalendar = (bot) => {
       await ctx.reply(ctx.i18n.t("questionnaire.thank_you"), {
         parse_mode: "HTML",
       });
-      
+
       await ctx.reply("@makkentoshh");
 
       if (ctx.session.selectTime) {
