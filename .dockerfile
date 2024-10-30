@@ -1,5 +1,5 @@
 # Use the official Node.js image from the Docker Hub
-FROM node:18-alpine
+FROM node:18
 
 # Set the working directory in the container
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies with legacy peer dependencies
-RUN npm install --production --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of your application code
 COPY . .
