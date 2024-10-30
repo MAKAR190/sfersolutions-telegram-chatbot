@@ -189,18 +189,38 @@ async function displayVacancies(ctx) {
           ? vacancy.tasks || "Завдання не вказані"
           : vacancy[18] || "Завдання відсутні";
 
-        const additionalOne = ctx.session.searching
-          ? "\n - Житло: " + vacancy.additionalOne || "Додатково не вказано"
-          : "\n - Житло: " + vacancy[19];
-        const additionalTwo = ctx.session.searching
-          ? "\n - Доставка: " + vacancy.additionalTwo || ""
-          : "\n - Доставка: " + vacancy[20];
-        const additionalThree = ctx.session.searching
-          ? "\n - Обіди: " + vacancy.additionalThree || ""
-          : "\n - Обіди: " + vacancy[21];
-        const additionalFour = ctx.session.searching
-          ? "\n - Уніформа: " + vacancy.additionalFour || ""
-          : "\n - Уніформа: " + vacancy[22];
+        let additionalInfo = "";
+        if (vacancy.additionalOne) {
+          additionalInfo += "\n - Житло: " + vacancy.additionalOne;
+        }
+
+        if (vacancy.additionalTwo) {
+          additionalInfo += "\n - Доставка: " + vacancy.additionalTwo;
+        }
+
+        if (vacancy.additionalThree) {
+          additionalInfo += "\n - Обіди: " + vacancy.additionalThree;
+        }
+
+        if (vacancy.additionalFour) {
+          additionalInfo += "\n - Уніформа: " + vacancy.additionalFour;
+        }
+
+        if (vacancy[19]) {
+          additionalInfo += "\n - Житло: " + vacancy[19];
+        }
+
+        if (vacancy[20]) {
+          additionalInfo += "\n - Доставка: " + vacancy[20];
+        }
+
+        if (vacancy[21]) {
+          additionalInfo += "\n - Обіди: " + vacancy[21];
+        }
+
+        if (vacancy[22]) {
+          additionalInfo += "\n - Уніформа: " + vacancy[22];
+        }
 
         const shiftInfo = ctx.session.searching
           ? ""
@@ -223,7 +243,7 @@ async function displayVacancies(ctx) {
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Завдання</b>: ${tasks}
-➕ <b>Додатково</b>: ${additionalOne} ${additionalTwo} ${additionalThree} ${additionalFour} \n
+➕ <b>Додатково</b>: ${additionalInfo}  \n
 ___________________________________________`;
       })
       .join("\n\n");
@@ -266,19 +286,39 @@ ___________________________________________`;
         const tasks = ctx.session.searching
           ? vacancy.tasks || "Задачи не указаны"
           : vacancy[18] || "Задачи отсутствуют";
+        let additionalInfo = "";
 
-        const additionalOne = ctx.session.searching
-          ? "\n - Жилье: " + vacancy.additionalOne || "Дополнительно не указано"
-          : "\n - Жилье: " + vacancy[19];
-        const additionalTwo = ctx.session.searching
-          ? "\n - Доставка: " + vacancy.additionalTwo || ""
-          : "\n - Доставка: " + vacancy[20];
-        const additionalThree = ctx.session.searching
-          ? "\n - Обеды: " + vacancy.additionalThree || ""
-          : "\n - Обеды: " + vacancy[21];
-        const additionalFour = ctx.session.searching
-          ? "\n - Униформа: " + vacancy.additionalFour || ""
-          : "\n - Униформа: " + vacancy[22];
+        if (vacancy.additionalOne) {
+          additionalInfo += "\n - Жилье: " + vacancy.additionalOne;
+        }
+
+        if (vacancy.additionalTwo) {
+          additionalInfo += "\n - Доставка: " + vacancy.additionalTwo;
+        }
+
+        if (vacancy.additionalThree) {
+          additionalInfo += "\n - Обеды: " + vacancy.additionalThree;
+        }
+
+        if (vacancy.additionalFour) {
+          additionalInfo += "\n - Униформа: " + vacancy.additionalFour;
+        }
+
+        if (vacancy[19]) {
+          additionalInfo += "\n - Жилье: " + vacancy[19];
+        }
+
+        if (vacancy[20]) {
+          additionalInfo += "\n - Доставка: " + vacancy[20];
+        }
+
+        if (vacancy[21]) {
+          additionalInfo += "\n - Обеды: " + vacancy[21];
+        }
+
+        if (vacancy[22]) {
+          additionalInfo += "\n - Униформа: " + vacancy[22];
+        }
 
         const shiftInfo = ctx.session.searching
           ? ""
@@ -301,7 +341,7 @@ ___________________________________________`;
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Задачи</b>: ${tasks}
-➕ <b>Дополнительно</b>: ${additionalOne} ${additionalTwo} ${additionalThree} ${additionalFour} \n
+➕ <b>Дополнительно</b>: ${additionalInfo} \n
 ___________________________________________`;
       })
       .join("\n\n");
@@ -349,23 +389,39 @@ ___________________________________________`;
         const tasks = ctx.session.searching
           ? vacancy.tasks || "Tasks not specified"
           : vacancy[18] || "No tasks listed";
+        let additionalInfo = "";
 
-        const additionalOne = ctx.session.searching
-          ? "\n - Housing: " +
-            (vacancy.additionalOne || "Additional info not specified")
-          : "\n - Housing: " + vacancy[19];
+        if (vacancy.additionalOne) {
+          additionalInfo += "\n - Housing: " + vacancy.additionalOne;
+        }
 
-        const additionalTwo = ctx.session.searching
-          ? "\n - Transport: " + (vacancy.additionalTwo || "")
-          : "\n - Transport: " + vacancy[20];
+        if (vacancy.additionalTwo) {
+          additionalInfo += "\n - Transport: " + vacancy.additionalTwo;
+        }
 
-        const additionalThree = ctx.session.searching
-          ? "\n - Meals: " + (vacancy.additionalThree || "")
-          : "\n - Meals: " + vacancy[21];
+        if (vacancy.additionalThree) {
+          additionalInfo += "\n - Meals: " + vacancy.additionalThree;
+        }
 
-        const additionalFour = ctx.session.searching
-          ? "\n - Uniform: " + (vacancy.additionalFour || "")
-          : "\n - Uniform: " + vacancy[22];
+        if (vacancy.additionalFour) {
+          additionalInfo += "\n - Uniform: " + vacancy.additionalFour;
+        }
+
+        if (vacancy[19]) {
+          additionalInfo += "\n - Housing: " + vacancy[19];
+        }
+
+        if (vacancy[20]) {
+          additionalInfo += "\n - Transport: " + vacancy[20];
+        }
+
+        if (vacancy[21]) {
+          additionalInfo += "\n - Meals: " + vacancy[21];
+        }
+
+        if (vacancy[22]) {
+          additionalInfo += "\n - Uniform: " + vacancy[22];
+        }
 
         const shiftInfo = ctx.session.searching
           ? ""
@@ -388,7 +444,7 @@ ___________________________________________`;
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Tasks</b>: ${tasks}
-➕ <b>Additional</b>: ${additionalOne} ${additionalTwo} ${additionalThree} ${additionalFour} \n
+➕ <b>Additional</b>: ${additionalInfo} \n
 ___________________________________________`;
       })
       .join("\n\n");
