@@ -4,7 +4,7 @@ const { GOOGLE_CREDENTIALS } = require("../config/config");
 const auth = new google.auth.JWT(
   GOOGLE_CREDENTIALS.client_email,
   null,
-  GOOGLE_CREDENTIALS.private_key.replace(/\\n/g, "\n"),
+  GOOGLE_CREDENTIALS.private_key,
   ["https://www.googleapis.com/auth/spreadsheets"]
 );
 
