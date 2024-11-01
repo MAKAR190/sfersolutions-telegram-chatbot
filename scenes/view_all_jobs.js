@@ -16,7 +16,6 @@ const viewVacanciesScene = new Scenes.WizardScene(
   "view_all_jobs_scene",
 
   async (ctx) => {
-    console.log("Entering view_all_jobs_scene - Step 1");
     await ctx.reply(ctx.i18n.t("vacancies.welcome"), {
       parse_mode: "HTML",
       reply_markup: Markup.keyboard([
@@ -35,7 +34,6 @@ const viewVacanciesScene = new Scenes.WizardScene(
 
   async (ctx) => {
     if (await handleCommand(ctx)) return;
-    console.log("Entering view_all_jobs_scene - Step 2");
     const choice = ctx.message?.text;
     ctx.session.currentPage = 0;
 
@@ -71,7 +69,6 @@ const viewVacanciesScene = new Scenes.WizardScene(
 
   async (ctx) => {
     if (await handleCommand(ctx)) return;
-    console.log("Handling city input");
     const city = ctx.message?.text;
     ctx.session.cities.push(city);
     await ctx.reply(ctx.i18n.t("vacancies.add_another_city"), {
@@ -85,7 +82,6 @@ const viewVacanciesScene = new Scenes.WizardScene(
 
   async (ctx) => {
     if (await handleCommand(ctx)) return;
-    console.log("Handling user's response for another city search");
     const response = ctx.message?.text;
 
     if (response === ctx.i18n.t("yes")) {
@@ -243,7 +239,7 @@ async function displayVacancies(ctx) {
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Завдання</b>: ${tasks}
-➕ <b>Додатково</b>: ${additionalInfo}  \n
+${additionalInfo ? `➕ <b>Додатково</b>: \n${additionalInfo}` : ""}
 ___________________________________________`;
       })
       .join("\n\n");
@@ -341,7 +337,7 @@ ___________________________________________`;
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Задачи</b>: ${tasks}
-➕ <b>Дополнительно</b>: ${additionalInfo} \n
+${additionalInfo ? `➕ <b>Дополнительно</b>: \n ${additionalInfo}` : ""}
 ___________________________________________`;
       })
       .join("\n\n");
@@ -444,7 +440,7 @@ ___________________________________________`;
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Tasks</b>: ${tasks}
-➕ <b>Additional</b>: ${additionalInfo} \n
+${additionalInfo ? `➕ <b>Additional</b>: \n ${additionalInfo}` : ""}
 ___________________________________________`;
       })
       .join("\n\n");
@@ -484,7 +480,6 @@ ___________________________________________`;
 
     // If the action starts with "apply_", do not edit the message
     if (action.startsWith("apply_")) {
-      console.log("Skipping message edit for action:", action);
       return; // Exit early, no further action needed
     }
 

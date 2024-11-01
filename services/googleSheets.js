@@ -10,7 +10,6 @@ const auth = new google.auth.JWT(
 
 const appendToSheet = async (spreadsheetId, userId, values) => {
   try {
-    console.log("Attempting to save the following values:", values);
 
     if (!values || !Array.isArray(values) || values.length === 0) {
       console.error(
@@ -34,10 +33,6 @@ const appendToSheet = async (spreadsheetId, userId, values) => {
       };
 
       await sheets.spreadsheets.values.update(request);
-      console.log(
-        `Updated data for user ${userId} in row ${userIndex + 1}:`,
-        values
-      );
     } else {
       const request = {
         spreadsheetId: spreadsheetId,
@@ -50,7 +45,6 @@ const appendToSheet = async (spreadsheetId, userId, values) => {
       };
 
       await sheets.spreadsheets.values.append(request);
-      console.log(`Data saved to sheet ${spreadsheetId}:`, values);
     }
   } catch (error) {
     console.error("Error appending to Google Sheets:", error);
@@ -89,12 +83,8 @@ const updateStartDateById = async (spreadsheetId, userId, startDate) => {
       };
 
       await sheets.spreadsheets.values.update(request);
-      console.log(
-        `Updated startDate for user ${userId} to ${startDate} in row ${rowIndex}`
-      );
-    } else {
-      console.log(`User ID ${userId} not found.`);
-    }
+    } 
+
   } catch (error) {
     console.error("Error updating startDate in Google Sheets:", error);
   }
@@ -141,7 +131,6 @@ const getVacancies = async (spreadsheetId, language) => {
         range = "Все Вакансии!E5:AA";
         break;
       default:
-        console.log("Unsupported language. Defaulting to English.");
         range = "All Vacancies!E5:AA";
     }
 
@@ -152,10 +141,8 @@ const getVacancies = async (spreadsheetId, language) => {
 
     const rows = response.data.values;
     if (!rows || rows.length === 0) {
-      console.log("No vacancies found.");
       return [];
     }
-    console.log(rows);
 
     return rows;
   } catch (error) {
@@ -179,7 +166,6 @@ const getVacanciesAbroad = async (spreadsheetId, language) => {
         range = "Заграничние Вакансии!E5:AA";
         break;
       default:
-        console.log("Unsupported language. Defaulting to English.");
         range = "Vacancies Abroad!E5:AA";
     }
 
@@ -190,7 +176,6 @@ const getVacanciesAbroad = async (spreadsheetId, language) => {
 
     const rows = response.data.values;
     if (!rows || rows.length === 0) {
-      console.log("No vacancies found.");
       return [];
     }
 
@@ -252,7 +237,6 @@ const getVacanciesByCity = async (spreadsheetId, cities, language) => {
         abroadVacanciesRange = "Заграничние Вакансии!E5:AA"; // Russian abroad sheet
         break;
       default:
-        console.log("Unsupported language. Defaulting to English.");
         allVacanciesRange = "All Vacancies!E5:AA"; // Fallback to English
         abroadVacanciesRange = "Vacancies Abroad!E5:AA"; // Fallback to English abroad sheet
     }
@@ -371,7 +355,6 @@ const getVacanciesByJobOfferings = async (
         abroadVacanciesRange = "Заграничние Вакансии!E5:AA"; // Russian abroad sheet
         break;
       default:
-        console.log("Unsupported language. Defaulting to English.");
         allVacanciesRange = "All Vacancies!E5:AA"; // Fallback to English
         abroadVacanciesRange = "Vacancies Abroad!E5:AA"; // Fallback to English abroad sheet
     }
@@ -441,11 +424,7 @@ const getVacanciesByJobOfferings = async (
       return value >= min && value <= max;
     };
 
-    console.log("Searching for:", {
-      workHours: parseInt(workHours, 10),
-      workingDays: parseInt(workingDays, 10),
-      shiftOption,
-    });
+ 
 
     const filteredResults = dataObjects.filter((vacancy) => {
       const workHoursRange = parseRange(vacancy.hoursPerDay);
@@ -467,16 +446,11 @@ const getVacanciesByJobOfferings = async (
         (shiftOption === "shift_night" && vacancy.night.trim() === "y") ||
         (shiftOption === "shift_evening" && vacancy.evening.trim() === "y");
 
-      console.log("Checking vacancy:", vacancy, {
-        matchesWorkHours,
-        matchesWorkingDays,
-        matchesShiftOption,
-      });
+
 
       return matchesWorkHours && matchesWorkingDays && matchesShiftOption;
     });
 
-    console.log("Filtered Results:", filteredResults);
 
     return [...new Set(filteredResults)];
   } catch (error) {
@@ -511,7 +485,7 @@ const getVacanciesByGenderAndAge = async (
         abroadVacanciesRange = "Заграничние Вакансии!E5:AA"; // Russian abroad sheet
         break;
       default:
-        console.log("Unsupported language. Defaulting to English.");
+      
         allVacanciesRange = "All Vacancies!E5:AA"; // Fallback to English
         abroadVacanciesRange = "Vacancies Abroad!E5:AA"; // Fallback to English abroad sheet
     }
@@ -580,7 +554,6 @@ const getVacanciesByGenderAndAge = async (
       return value >= min && value <= max;
     };
 
-    console.log("Searching for:", { gender, ages });
 
     const filteredResults = dataObjects.filter((vacancy) => {
       const ageRange = parseRange(vacancy.age);
@@ -624,16 +597,11 @@ const getVacanciesByGenderAndAge = async (
         (option) => genderOptions.includes(option) && !matchesGender
       );
 
-      console.log("Checking vacancy:", vacancy, {
-        matchesAge,
-        matchesGender,
-        isIncompatible,
-      });
+
 
       return matchesAge && matchesGender && !isIncompatible;
     });
 
-    console.log("Filtered Results:", filteredResults);
 
     return [...new Set(filteredResults)];
   } catch (error) {
