@@ -456,7 +456,7 @@ async function displayVacancies(ctx) {
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Tasks</b>: ${tasks}
-${additionalInfo ? `➕ <b>Additional</b>: \n${additionalInfo}` : ""}
+${additionalInfo ? `➕ <b>Additional</b>: ${additionalInfo}` : ""}
 ___________________________________________`;
       })
       .join("\n\n");
@@ -515,7 +515,7 @@ ___________________________________________`;
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Задачи</b>: ${tasks}
-${additionalInfo ? `➕ <b>Дополнительно</b>: \n${additionalInfo}` : ""}
+${additionalInfo ? `➕ <b>Дополнительно</b>: ${additionalInfo}` : ""}
 ___________________________________________`;
       })
       .join("\n\n");
@@ -575,7 +575,7 @@ ___________________________________________`;
           shiftInfo ? `${shiftInfo}` : ""
         }\n
 ✔️ <b>Завдання</b>: ${tasks}
-${additionalInfo ? `➕ <b>Додатково</b>: \n${additionalInfo}` : ""}
+${additionalInfo ? `➕ <b>Додатково</b>: ${additionalInfo}` : ""}
 ___________________________________________`;
       })
       .join("\n\n");
