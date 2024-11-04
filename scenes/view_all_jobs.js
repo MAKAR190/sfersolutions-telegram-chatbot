@@ -6,7 +6,6 @@ const {
 } = require("../services/googleSheets");
 const { GOOGLE_SHEET_ID } = require("../config/config");
 const { mainKeyboard } = require("../utils/keyboards");
-const { getCalendar } = require("../calendar");
 const handleCommand = require("../handlers/handleCommand");
 const VACANCIES_PER_PAGE = 4;
 function areKeyboardsEqual(keyboard1, keyboard2) {
@@ -191,7 +190,7 @@ async function displayVacancies(ctx) {
         }
 
         if (vacancy.additionalTwo) {
-          additionalInfo += "\n - Доставка: " + vacancy.additionalTwo;
+          additionalInfo += "\n - Доїзд: " + vacancy.additionalTwo;
         }
 
         if (vacancy.additionalThree) {
@@ -207,7 +206,7 @@ async function displayVacancies(ctx) {
         }
 
         if (vacancy[20]) {
-          additionalInfo += "\n - Доставка: " + vacancy[20];
+          additionalInfo += "\n - Доїзд: " + vacancy[20];
         }
 
         if (vacancy[21]) {
@@ -289,7 +288,7 @@ ___________________________________________`;
         }
 
         if (vacancy.additionalTwo) {
-          additionalInfo += "\n - Доставка: " + vacancy.additionalTwo;
+          additionalInfo += "\n - Доезд: " + vacancy.additionalTwo;
         }
 
         if (vacancy.additionalThree) {
@@ -305,7 +304,7 @@ ___________________________________________`;
         }
 
         if (vacancy[20]) {
-          additionalInfo += "\n - Доставка: " + vacancy[20];
+          additionalInfo += "\n - Доезд: " + vacancy[20];
         }
 
         if (vacancy[21]) {
