@@ -124,5 +124,6 @@
   "no": "No ❌",
   "invalid_phone_number": "The phone number you entered is invalid. Please enter a valid phone number.",
   "contact_recruiter_message": "When would it be convenient for our recruiter to contact you?",
-  "invalid_yes_or_no": "Invalid Answer. Choose 'Yes' or 'No'"
+  "invalid_yes_or_no": "Invalid Answer. Choose 'Yes' or 'No'",
+  "recruiter_will_contact_soon": "Our recruiter will contact you soon!"
 }
