@@ -17,7 +17,17 @@ const questionnaireScene = new Scenes.WizardScene(
   async (ctx) => {
     ctx.session.contactProcess = false;
 
-    await ctx.replyWithContact("+48660177808", "Mak", {
+    const userId = ctx.from.id;
+
+    await ctx.telegram.sendMessage(userId, "+48660177808", {
+      parse_mode: "HTML",
+    });
+
+    await ctx.telegram.sendMessage(userId, "Mak", {
+      parse_mode: "HTML",
+    });
+
+    await ctx.telegram.sendMessage(userId, ctx.i18n.t("main_menu.select_job"), {
       parse_mode: "HTML",
       reply_markup: Markup.keyboard([
         [
@@ -28,7 +38,10 @@ const questionnaireScene = new Scenes.WizardScene(
           Markup.button.text(ctx.i18n.t("main_menu.contact_recruiter")),
           Markup.button.text(ctx.i18n.t("main_menu.submit_application")),
         ],
-        [Markup.button.text(ctx.i18n.t("main_menu.change_language"))],
+        [
+          Markup.button.text(ctx.i18n.t("main_menu.subscribe")),
+          Markup.button.text(ctx.i18n.t("main_menu.change_language")),
+        ],
       ]).oneTime().reply_markup,
     });
 
@@ -50,7 +63,8 @@ const questionnaireScene = new Scenes.WizardScene(
 );
 
 questionnaireScene.hears(match("cancel"), async (ctx) => {
-  await ctx.reply(ctx.i18n.t("cancel"), {
+  const userId = ctx.from.id;
+  await ctx.telegram.sendMessage(userId, ctx.i18n.t("cancel"), {
     parse_mode: "HTML",
     reply_markup: mainKeyboard(ctx).reply_markup,
   });
@@ -59,14 +73,16 @@ questionnaireScene.hears(match("cancel"), async (ctx) => {
 });
 
 questionnaireScene.command("help", (ctx) => {
-  ctx.reply(ctx.i18n.t("available_commands"), {
+  const userId = ctx.from.id;
+  ctx.telegram.sendMessage(userId, ctx.i18n.t("available_commands"), {
     parse_mode: "HTML",
     reply_markup: mainKeyboard(ctx).reply_markup,
   });
 });
 
 questionnaireScene.command("cancel", (ctx) => {
-  ctx.reply(ctx.i18n.t("cancel"), {
+  const userId = ctx.from.id;
+  ctx.telegram.sendMessage(userId, ctx.i18n.t("cancel"), {
     parse_mode: "HTML",
     reply_markup: mainKeyboard(ctx).reply_markup,
   });

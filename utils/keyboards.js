@@ -18,7 +18,10 @@ const mainKeyboard = (ctx) =>
       Markup.button.text(ctx.i18n.t("main_menu.contact_recruiter")),
       Markup.button.text(ctx.i18n.t("main_menu.submit_application")),
     ],
-    [Markup.button.text(ctx.i18n.t("main_menu.change_language"))],
+    [
+      Markup.button.text(ctx.i18n.t("main_menu.subscribe")),
+      Markup.button.text(ctx.i18n.t("main_menu.change_language")),
+    ],
   ]).oneTime();
 
 const backKeyboard = (ctx) =>

@@ -4,10 +4,7 @@ const { backKeyboard } = require("../utils/keyboards");
 const { getCalendar } = require("../calendar");
 const { GOOGLE_SHEET_ID } = require("../config/config");
 const handleCommand = require("../handlers/handleCommand");
-const {
-  checkUserIdExists,
-  updateStartDateById,
-} = require("../services/googleSheets");
+const { checkUserIdExists } = require("../services/googleSheets");
 const Papa = require("papaparse");
 const fs = require("fs");
 
@@ -743,7 +740,10 @@ questionnaireScene.hears(match("cancel"), (ctx) => {
         Markup.button.text(ctx.i18n.t("main_menu.contact_recruiter")),
         Markup.button.text(ctx.i18n.t("main_menu.submit_application")),
       ],
-      [Markup.button.text(ctx.i18n.t("main_menu.change_language"))],
+      [
+        Markup.button.text(ctx.i18n.t("main_menu.subscribe")),
+        Markup.button.text(ctx.i18n.t("main_menu.change_language")),
+      ],
     ]).oneTime().reply_markup,
   });
 

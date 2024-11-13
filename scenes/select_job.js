@@ -47,13 +47,13 @@ const selectJobScene = new Scenes.WizardScene(
       ctx.session.searching = true;
       return ctx.wizard.next();
     } else if (selectedOption === ctx.i18n.t("job_selection.choose_by_job")) {
-      ctx.session.searching = false; // Set searching to false for job offerings
+      ctx.session.searching = false;
       ctx.wizard.cursor += 2;
       return ctx.wizard.steps[ctx.wizard.cursor](ctx);
     } else if (
       selectedOption === ctx.i18n.t("job_selection.choose_by_gender_age")
     ) {
-      ctx.session.searching = false; // Set searching to false for job offerings
+      ctx.session.searching = false;
       ctx.wizard.cursor += 6;
       return ctx.wizard.steps[ctx.wizard.cursor](ctx);
     } else if (selectedOption === ctx.i18n.t("go_back")) {
@@ -68,7 +68,10 @@ const selectJobScene = new Scenes.WizardScene(
             Markup.button.text(ctx.i18n.t("main_menu.contact_recruiter")),
             Markup.button.text(ctx.i18n.t("main_menu.submit_application")),
           ],
-          [Markup.button.text(ctx.i18n.t("main_menu.change_language"))],
+          [
+            Markup.button.text(ctx.i18n.t("main_menu.subscribe")),
+            Markup.button.text(ctx.i18n.t("main_menu.change_language")),
+          ],
         ]).oneTime().reply_markup,
       });
       return ctx.scene.leave();

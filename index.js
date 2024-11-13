@@ -9,6 +9,7 @@ const submitScene = require("./scenes/submit_application");
 const viewAllJobsScene = require("./scenes/view_all_jobs");
 const selectJobScene = require("./scenes/select_job");
 const applyScene = require("./scenes/applyScene");
+const subscribeScene = require("./scenes/subscribeScene");
 const { TELEGRAM_TOKEN } = require("./config/config");
 const { initializeCalendar } = require("./calendar");
 
@@ -30,6 +31,7 @@ const stage = new Scenes.Stage([
   selectJobScene,
   viewAllJobsScene,
   applyScene,
+  subscribeScene,
 ]);
 
 bot.use(stage.middleware());
@@ -51,6 +53,9 @@ bot.hears(match("main_menu.select_job"), (ctx) =>
 bot.hears(match("main_menu.view_all_jobs"), (ctx) =>
   ctx.scene.enter("view_all_jobs_scene")
 );
+// bot.hears(match("main_menu.subscribe"), (ctx) =>
+//   ctx.scene.enter("subscribe_scene")
+// );
 
 bot.command("change_language", (ctx) => ctx.scene.enter("changeLanguage"));
 bot.command("restart", (ctx) => {

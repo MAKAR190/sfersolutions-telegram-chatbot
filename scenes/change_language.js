@@ -6,14 +6,18 @@ const handleCommand = require("../handlers/handleCommand");
 const changeLanguageScene = new WizardScene(
   "changeLanguage",
   async (ctx) => {
-    await ctx.reply(ctx.i18n.t("select_language"), {
+    const userId = ctx.from.id;
+
+    await ctx.telegram.sendMessage(userId, ctx.i18n.t("select_language"), {
       parse_mode: "HTML",
       reply_markup: languageKeyboard.reply_markup,
     });
+
     return ctx.wizard.next();
   },
   async (ctx) => {
     if (await handleCommand(ctx)) return;
+
     const selectedLanguage = ctx.message.text;
 
     ctx.session.language =
@@ -27,8 +31,10 @@ const changeLanguageScene = new WizardScene(
 
     ctx.i18n.locale(ctx.session.language);
 
+    const userId = ctx.from.id;
     const confirmationMessage = ctx.i18n.t("success");
-    await ctx.reply(confirmationMessage, {
+
+    await ctx.telegram.sendMessage(userId, confirmationMessage, {
       parse_mode: "HTML",
       reply_markup: mainKeyboard(ctx).reply_markup,
     });

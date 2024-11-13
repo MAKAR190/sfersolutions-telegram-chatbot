@@ -11,6 +11,7 @@
     "contact_recruiter": "📞 Contact a recruiter",
     "submit_application": "✍️ Submit a job application",
     "change_language": "🌐 Change language",
+    "subscribe": "📧 Subscribe to job alerts",
     "prompt": "<b>👋 Welcome to the main menu!</b> Please choose an option:"
   },
   "available_commands": "<b>Available commands:</b>\n\n• <code>/start</code> - Start the conversation and get a welcome message.\n• <code>/change_language</code> - Change your preferred language.\n• <code>/restart</code> - Restart the conversation from the beginning.\n• <code>/help</code> - Show all available commands.\n• <code>/view_all_job_listings</code> - View all actual vacancies.\n• <code>/select_job</code> - Find a job by preferred options.\n• <code>/submit_application</code> - Submit an application for vacancy search.\n• <code>/contact_recruiter</code> - Choose a time and contact the recruiter when needed.",
@@ -107,6 +108,17 @@
     },
     "gender_selected": "<b>Please enter your age:</b>",
     "invalid_age": "Please enter a valid age (e.g., 18, 25). ⚠️"
+  },
+  "subscribe": {
+    "enter_age": "Please enter your age:",
+    "select_gender": "Please select your gender:",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "enter_rate": "Please enter your desired rate (hourly or monthly):",
+    "enter_city": "Please enter your city:",
+    "confirmation": "You've subscribed with the following parameters:\n- Age: {{age}}\n- Gender: {{gender}}\n- Rate: {{rate}}\n- City: {{city}}",
+    "select_gender_error": "Please use the buttons to select your gender."
   },
   "yes": "Yes ✅",
   "no": "No ❌",
