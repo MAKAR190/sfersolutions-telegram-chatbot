@@ -37,6 +37,17 @@ const stage = new Scenes.Stage([
 bot.use(stage.middleware());
 initializeCalendar(bot);
 
+bot.use((ctx, next) => {
+  if (
+    ctx.updateType === "message" &&
+    ctx.message.text &&
+    !ctx.message.text.startsWith("/")
+  ) {
+    ctx.reply(ctx.i18n.t("recruiter_will_contact_soon"));
+  }
+  return next();
+});
+
 bot.start((ctx) => ctx.scene.enter("startScene"));
 bot.hears(match("main_menu.change_language"), (ctx) =>
   ctx.scene.enter("changeLanguage")
@@ -53,14 +64,6 @@ bot.hears(match("main_menu.select_job"), (ctx) =>
 bot.hears(match("main_menu.view_all_jobs"), (ctx) =>
   ctx.scene.enter("view_all_jobs_scene")
 );
-bot.on("text", (ctx) => {
-  if (!ctx.message.text.startsWith("/")) {
-    ctx.telegram.sendMessage(
-      ctx.from.id,
-      ctx.i18n.t("recruiter_will_contact_soon")
-    );
-  }
-});
 
 // bot.hears(match("main_menu.subscribe"), (ctx) =>
 //   ctx.scene.enter("subscribe_scene")
