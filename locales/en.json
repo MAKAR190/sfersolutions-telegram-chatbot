@@ -114,11 +114,12 @@
     "select_gender": "Please select your gender:",
     "male": "Male",
     "female": "Female",
-    "other": "Other",
+    "other": "Couples",
     "enter_rate": "Please enter your desired rate (hourly or monthly):",
     "enter_city": "Please enter your city:",
-    "confirmation": "You've subscribed with the following parameters:\n- Age: {{age}}\n- Gender: {{gender}}\n- Rate: {{rate}}\n- City: {{city}}",
-    "select_gender_error": "Please use the buttons to select your gender."
+    "confirmation": "You've subscribed! We will inform you on new vacancies very soon!",
+    "select_gender_error": "Please use the buttons to select your gender.",
+    "enter_rate_invalid": "Please enter a valid rate. It must be a positive number."
   },
   "yes": "Yes ✅",
   "no": "No ❌",

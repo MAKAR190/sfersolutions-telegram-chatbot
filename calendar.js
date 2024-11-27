@@ -310,8 +310,8 @@ const initializeCalendar = (bot) => {
       if (ctx.session.applying && ctx.session.selectTime) {
         const messageToRecruiter = `📢 Новий кандидат подав заявку на вакансію:
     📝 Назва вакансії: ${
-      ctx.session.selectedVacancy.title || ctx.session.selectedVacancy[0] || ""
-    }, ${ctx.session.selectedVacancy.location || ctx.session.selectedVacancy[4]}
+      ctx.session.selectedVacancy.title || ctx.session.selectedVacancy[0] ||   ctx.session.selectedVacancy.vacancyTitle  || ""
+    }, ${ctx.session.selectedVacancy.location || ctx.session.selectedVacancy[4] ||  ctx.session.selectedVacancy.vacancyLocation }
     👤 Ім'я: ${ctx.session.fullName}, @${ctx.from.username}
     📞 Номер телефону: ${ctx.session.phoneNumber}
     🚚 Готовність до переїзду: ${ctx.session.relocationReadiness}

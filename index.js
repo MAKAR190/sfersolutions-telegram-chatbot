@@ -10,11 +10,13 @@ const viewAllJobsScene = require("./scenes/view_all_jobs");
 const selectJobScene = require("./scenes/select_job");
 const applyScene = require("./scenes/applyScene");
 const subscribeScene = require("./scenes/subscribeScene");
-const { TELEGRAM_TOKEN } = require("./config/config");
+const { TELEGRAM_TOKEN, GOOGLE_SHEET_ID } = require("./config/config");
+const { notifySubscribers } = require("./services/googleSheets");
 const { initializeCalendar } = require("./calendar");
+const cron = require("node-cron");
 
 const i18n = new TelegrafI18n({
-  defaultLanguage: "en",
+  defaultLanguage: "ru",
   directory: "./locales",
   useSession: true,
 });
@@ -37,17 +39,6 @@ const stage = new Scenes.Stage([
 bot.use(stage.middleware());
 initializeCalendar(bot);
 
-bot.use((ctx, next) => {
-  if (
-    ctx.updateType === "message" &&
-    ctx.message.text &&
-    !ctx.message.text.startsWith("/")
-  ) {
-    ctx.reply(ctx.i18n.t("recruiter_will_contact_soon"));
-  }
-  return next();
-});
-
 bot.start((ctx) => ctx.scene.enter("startScene"));
 bot.hears(match("main_menu.change_language"), (ctx) =>
   ctx.scene.enter("changeLanguage")
@@ -65,9 +56,9 @@ bot.hears(match("main_menu.view_all_jobs"), (ctx) =>
   ctx.scene.enter("view_all_jobs_scene")
 );
 
-// bot.hears(match("main_menu.subscribe"), (ctx) =>
-//   ctx.scene.enter("subscribe_scene")
-// );
+bot.hears(match("main_menu.subscribe"), (ctx) =>
+  ctx.scene.enter("subscribe_scene")
+);
 
 bot.command("change_language", (ctx) => ctx.scene.enter("changeLanguage"));
 bot.command("restart", (ctx) => {
@@ -87,6 +78,27 @@ bot.command("view_all_job_listings", (ctx) =>
   ctx.scene.enter("view_all_jobs_scene")
 );
 bot.command("select_job", (ctx) => ctx.scene.enter("select_job_scene"));
+
+bot.use((ctx, next) => {
+  if (
+      ctx.updateType === "message" &&
+      ctx.message.text &&
+      !ctx.message.text.startsWith("/")
+  ) {
+    ctx.reply(ctx.i18n.t("recruiter_will_contact_soon"), {
+      reply_to_message_id: ctx.message.message_id,
+    });
+  }
+  return next();
+});
+
+
+
+cron.schedule('* * * * *', async () => {
+  console.log('Running scheduled job to notify subscribers...');
+  await notifySubscribers(bot, GOOGLE_SHEET_ID);
+});
+
 
 bot
   .launch()

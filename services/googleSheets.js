@@ -1,6 +1,7 @@
 const { google } = require("googleapis");
 const { GOOGLE_CREDENTIALS } = require("../config/config");
-
+const fuzz = require("fuzzball");
+const {language} = require("googleapis/build/src/apis/language");
 const auth = new google.auth.JWT(
   GOOGLE_CREDENTIALS.client_email,
   null,
@@ -48,6 +49,62 @@ const appendToSheet = async (spreadsheetId, userId, values) => {
     }
   } catch (error) {
     console.error("Error appending to Google Sheets:", error);
+  }
+};
+
+const appendToSubscribersSheet = async (spreadsheetId, userId, sceneState, username, lang) => {
+  try {
+    const { age, gender, rate, city } = sceneState;
+
+    if (!age || !gender || !rate || !city) {
+      console.error("Error: Missing required values to append to the sheet.");
+      return;
+    }
+
+    const values = [userId, username, age, gender, rate, city, lang]; // Customize this structure as needed.
+    const sheets = google.sheets({ version: "v4", auth }); // Ensure `auth` is correctly configured.
+
+    // Check if the user already exists in the sheet.
+    const checkUserExists = async () => {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Підписники!A:A", // Assumes user IDs are in column A.
+      });
+
+      const rows = response.data.values || [];
+      return rows.findIndex((row) => row[0] === userId) + 1; // +1 because row indices in Sheets are 1-based.
+    };
+
+    const userRow = await checkUserExists();
+
+    if (userRow > 0) {
+      // Update existing user.
+      const updateRange = `Підписники!A${userRow}:F${userRow}`;
+      await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range: updateRange,
+        valueInputOption: "RAW",
+        resource: {
+          values: [values],
+        },
+      });
+      console.log(`User ${userId} updated at row ${userRow}.`);
+    } else {
+      // Append new user.
+      const appendRange = "Підписники!A2";
+      await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: appendRange,
+        valueInputOption: "RAW",
+        insertDataOption: "INSERT_ROWS",
+        resource: {
+          values: [values],
+        },
+      });
+      console.log(`User ${userId} added to the sheet.`);
+    }
+  } catch (error) {
+    console.error("Error appending/updating Google Sheets:", error);
   }
 };
 
@@ -327,6 +384,7 @@ const getVacanciesByCity = async (spreadsheetId, cities, language) => {
     return [];
   }
 };
+
 const getVacanciesByJobOfferings = async (
   spreadsheetId,
   workHours,
@@ -458,10 +516,11 @@ const getVacanciesByJobOfferings = async (
     return [];
   }
 };
+
 const getVacanciesByGenderAndAge = async (
   spreadsheetId,
   gender,
-  ages, // Now accepts an array of ages
+  ages,
   language
 ) => {
   try {
@@ -609,8 +668,211 @@ const getVacanciesByGenderAndAge = async (
     return [];
   }
 };
+
+const notifySubscribers = async (bot, SHEET_ID) => {
+  try {
+    const sheets = google.sheets({ version: "v4", auth });
+    const subscribersResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: "Підписники",
+    });
+
+    const subscribers = subscribersResponse.data.values;
+
+    const vacanciesTables = {
+      en: "All Vacancies",
+      ua: "Всі вакансії",
+      ru: "Все вакансии",
+    };
+
+    const vacancyMessages = {
+      en: {
+        title: "🌟 *Vacancies Available* 🌟",
+        location: "📍 Location",
+        rate: "💰 Rate",
+        footer: "📩 Apply now and grab the opportunity!",
+      },
+      ua: {
+        title: "🌟 *Доступні вакансії* 🌟",
+        location: "📍 Локація",
+        rate: "💰 Ставка",
+        footer: "📩 Подайте заявку зараз та скористайтеся можливістю!",
+      },
+      ru: {
+        title: "🌟 *Доступные вакансии* 🌟",
+        location: "📍 Локация",
+        rate: "💰 Оплата",
+        footer: "📩 Подайте заявку прямо сейчас и воспользуйтесь шансом!",
+      },
+    };
+
+    for (const [index, subscriber] of subscribers.slice(1).entries()) {
+      const [userId, username, age, gender, rate, town, language, sentVacancyIds] = subscriber;
+
+      const vacanciesResponse = await sheets.spreadsheets.values.get({
+        spreadsheetId: SHEET_ID,
+        range: vacanciesTables[language],
+      });
+
+      const vacancies = vacanciesResponse.data.values;
+      if (!vacancies || vacancies.length <= 1) {
+        console.log(`No vacancies found for user ${userId}`);
+        continue;
+      }
+
+      const sentVacancyIdsArray = sentVacancyIds?.trim()
+          ? sentVacancyIds.split(",").map((id) => id.trim())
+          : [];
+
+      const relevantVacancies = vacancies.slice(1).filter((vacancy) => {
+        const [
+          ,
+          vacancyId,
+          ,
+          ,
+          ,
+          vacancyGender,
+          vacancyAgeRange,
+          vacancyTown,
+          ,
+          ,
+          ,
+          vacancyRate,
+        ] = vacancy;
+
+        const [minAge, maxAge] = vacancyAgeRange.split("-").map(Number);
+        const townMatch = fuzz.ratio(town.toLowerCase(), vacancyTown.toLowerCase()) > 80;
+
+        const validGender = vacancyGender.includes(gender);
+        const validRate = parseFloat(rate.replace(",", ".")) <= parseFloat(vacancyRate.replace(",", "."));
+        const validAge =
+            (isNaN(minAge) || Number(age) >= minAge) &&
+            (isNaN(maxAge) || Number(age) <= maxAge);
+
+        return (
+            validGender &&
+            validAge &&
+            validRate &&
+            townMatch &&
+            !sentVacancyIdsArray.includes(vacancyId.trim())
+        );
+      });
+
+      if (relevantVacancies.length > 0) {
+        const messages = relevantVacancies.map((vacancy, idx) => {
+          const [
+            ,
+            vacancyId,
+            ,
+            vacancyTitle,
+            ,
+            ,
+            ,
+            vacancyLocation,
+            ,
+            ,
+            ,
+            vacancyRate,
+          ] = vacancy;
+
+          return {
+            id: vacancyId,
+            index: idx,
+            message: `📝 *${vacancyTitle}*\n${vacancyMessages[language].location}: ${vacancyLocation}\n${vacancyMessages[language].rate}: ${vacancyRate} zł/hour\n\n`,
+          };
+        });
+
+        const inlineKeyboard = [];
+        for (let i = 0; i < messages.length; i += 2) {
+          inlineKeyboard.push(
+              messages.slice(i, i + 2).map(({ index }) => ({
+                text: `Apply for Vacancy ${index + 1}`,
+                callback_data: `apply_${index}`, // Pass vacancy index in callback data
+              }))
+          );
+        }
+
+        const consolidatedMessage = `${vacancyMessages[language].title}\n\n` +
+            messages.map(({ message }) => message).join("\n") +
+            `\n${vacancyMessages[language].footer}`;
+
+        console.log(`Sending consolidated message to user ${userId}`);
+        await bot.telegram.sendMessage(userId, consolidatedMessage, {
+          parse_mode: "Markdown",
+          reply_markup: { inline_keyboard: inlineKeyboard },
+        });
+
+        const newSentVacancyIds = [
+          ...sentVacancyIdsArray,
+          ...messages.map(({ id }) => id.trim()),
+        ].join(",");
+
+        const updateRange = `Підписники!H${index + 2}`;
+        await sheets.spreadsheets.values.update({
+          spreadsheetId: SHEET_ID,
+          range: updateRange,
+          valueInputOption: "RAW",
+          resource: { values: [[newSentVacancyIds]] },
+        });
+      }
+    }
+
+    // Handle callback queries to apply for a vacancy
+    bot.on("callback_query", async (ctx) => {
+      try {
+        const action = ctx.callbackQuery.data;
+        if (action.startsWith("apply_")) {
+          const vacancyIndex = parseInt(action.split("_")[1], 10);
+
+          // Fetch the vacancies again from Google Sheets or your data source
+          const vacanciesTables = {
+            en: "All Vacancies",
+            ua: "Всі вакансії",
+            ru: "Все вакансии",
+          };
+
+          const language = ctx.session.language || 'en'; // Assuming you store the user's language in session
+
+          // Re-fetch vacancies from Google Sheets based on the user's language
+          const vacanciesResponse = await sheets.spreadsheets.values.get({
+            spreadsheetId: SHEET_ID,
+            range: vacanciesTables[language],
+          });
+
+          const vacancies = vacanciesResponse.data.values;
+
+          if (!vacancies || vacancies.length <= 1) {
+            console.log("No vacancies found!");
+            await ctx.answerCbQuery("No vacancies available. Please try again later.", { show_alert: true });
+            return;
+          }
+
+          // Ensure that the index exists in the vacancies list
+          ctx.session.selectedVacancy = vacancies[vacancyIndex + 1]; // +1 because the first row is headers
+
+          // Pass the selected vacancy directly to the next scene
+          await ctx.answerCbQuery(); // Acknowledge the callback query
+          ctx.scene.enter("applyScene"); // Pass selected vacancy data to the scene
+        }
+      } catch (error) {
+        console.error("Error handling callback query:", error);
+        await ctx.answerCbQuery("An error occurred. Please try again later.", { show_alert: true });
+      }
+    });
+
+  } catch (error) {
+    console.error("Error notifying subscribers:", error);
+  }
+};
+
+
+
+
+
+
 module.exports = {
   appendToSheet,
+  appendToSubscribersSheet,
   checkUserIdExists,
   getVacancies,
   getVacanciesAbroad,
@@ -618,4 +880,5 @@ module.exports = {
   getVacanciesByCity,
   getVacanciesByJobOfferings,
   getVacanciesByGenderAndAge,
+  notifySubscribers
 };
