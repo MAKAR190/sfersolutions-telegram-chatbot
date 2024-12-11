@@ -306,7 +306,7 @@ const initializeCalendar = (bot) => {
         ]).oneTime().reply_markup,
       });
 
-      const recruiterUsername = -4733784986;
+      const recruiterUsername = -1002380136376;
       if (ctx.session.applying && ctx.session.selectTime) {
         const messageToRecruiter = `📢 Новий кандидат подав заявку на вакансію:
     📝 Назва вакансії: ${
