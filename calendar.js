@@ -306,7 +306,7 @@ const initializeCalendar = (bot) => {
         ]).oneTime().reply_markup,
       });
 
-      const recruiterUsername = 856647351; // Ensure this is a valid username
+      const recruiterUsername = 7250308341; // Ensure this is a valid username
       if (ctx.session.applying && ctx.session.selectTime) {
         const messageToRecruiter = `📢 Новий кандидат подав заявку на вакансію:
     📝 Назва вакансії: ${
@@ -425,7 +425,7 @@ const initializeCalendar = (bot) => {
         parse_mode: "HTML",
       });
 
-      await ctx.reply("@makkentoshh");
+      await ctx.reply("@sfersolution_work");
 
       if (ctx.session.selectTime) {
         ctx.session.selectTime = false;

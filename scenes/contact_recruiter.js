@@ -19,11 +19,11 @@ const questionnaireScene = new Scenes.WizardScene(
 
     const userId = ctx.from.id;
 
-    await ctx.telegram.sendMessage(userId, "+48660177808", {
+    await ctx.telegram.sendMessage(userId, "+48789753753", {
       parse_mode: "HTML",
     });
 
-    await ctx.telegram.sendMessage(userId, "Mak", {
+    await ctx.telegram.sendMessage(userId, "Anna", {
       parse_mode: "HTML",
     });
 
