@@ -8,6 +8,21 @@ const languageKeyboard = Markup.keyboard([
   .resize()
   .oneTime();
 
+const mainKeyboard = (ctx) =>
+  Markup.keyboard([
+    [
+      Markup.button.text(ctx.i18n.t("main_menu.select_job")),
+      Markup.button.text(ctx.i18n.t("main_menu.view_all_jobs")),
+    ],
+    [
+      Markup.button.text(ctx.i18n.t("main_menu.contact_recruiter")),
+      Markup.button.text(ctx.i18n.t("main_menu.submit_application")),
+    ],
+    [
+      Markup.button.text(ctx.i18n.t("main_menu.subscribe")),
+      Markup.button.text(ctx.i18n.t("main_menu.change_language")),
+    ],
+  ]).oneTime();
 
 const backKeyboard = (ctx) =>
   Markup.keyboard([
