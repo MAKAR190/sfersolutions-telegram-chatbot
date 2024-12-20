@@ -786,7 +786,7 @@ const notifySubscribers = async (bot, SHEET_ID) => {
         for (let i = 0; i < messages.length; i += 2) {
           inlineKeyboard.push(
               messages.slice(i, i + 2).map(({ index }) => ({
-                text: `Apply for Vacancy ${index + 1}`,
+                text: language == "ua" ? "Подати заявку " + (index + 1) : language == "ru" ? "Подать заявку " + (index + 1) : "Apply for " + (index + 1),
                 callback_data: `apply_${index}`, // Pass vacancy index in callback data
               }))
           );
@@ -849,7 +849,6 @@ const notifySubscribers = async (bot, SHEET_ID) => {
 
           // Ensure that the index exists in the vacancies list
           ctx.session.selectedVacancy = vacancies[vacancyIndex + 1]; // +1 because the first row is headers
-
           // Pass the selected vacancy directly to the next scene
           await ctx.answerCbQuery(); // Acknowledge the callback query
           ctx.scene.enter("applyScene"); // Pass selected vacancy data to the scene
@@ -865,6 +864,47 @@ const notifySubscribers = async (bot, SHEET_ID) => {
   }
 };
 
+const getDataFromSubscriber = async (userID) => {
+  const sheets = google.sheets({ version: "v4", auth });
+
+  try {
+    // Fetch data from the spreadsheet
+    const subscriberResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: "Підписники",  // Make sure this range matches the sheet and the data you're working with
+    });
+
+    // Get all rows from the sheet
+    const rows = subscriberResponse.data.values;
+
+    if (rows.length) {
+      // Iterate through rows to find the user by userID (first column)
+      const userRow = rows.find(row => row[0] === userID);
+
+      if (userRow) {
+        // Return user data as an object with specific keys
+        return {
+          userID: userRow[0],
+          nickname: userRow[1], // Second column (Nickname)
+          age: userRow[2], // Third column (Age)
+          gender: userRow[3], // Fourth column (Gender)
+          rate: userRow[4], // Fifth column (Rate)
+          town: userRow[5], // Sixth column (Town)
+        };
+      } else {
+        // Handle the case where the user is not found
+        console.log('User not found');
+        return null;
+      }
+    } else {
+      console.log('No data found in the sheet');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching data from Google Sheets:', error);
+    return null;
+  }
+};
 
 
 
@@ -880,5 +920,6 @@ module.exports = {
   getVacanciesByCity,
   getVacanciesByJobOfferings,
   getVacanciesByGenderAndAge,
-  notifySubscribers
+  notifySubscribers,
+  getDataFromSubscriber
 };

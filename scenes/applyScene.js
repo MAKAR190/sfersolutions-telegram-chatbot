@@ -6,6 +6,7 @@ const handleCommand = require("../handlers/handleCommand");
 const applyScene = new Scenes.WizardScene(
   "applyScene",
   async (ctx) => {
+    ctx.session.applying = true;
     await ctx.reply(ctx.i18n.t("application.ask_full_name"), {
       parse_mode: "HTML",
     });
@@ -92,7 +93,9 @@ const applyScene = new Scenes.WizardScene(
   },
   async (ctx) => {
     if (await handleCommand(ctx)) return;
+
     ctx.session.selectTime = true;
+
     const calendar = getCalendar();
     await ctx.reply(ctx.i18n.t("contact_recruiter_message"), {
       parse_mode: "HTML",

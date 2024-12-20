@@ -243,7 +243,7 @@ const { GOOGLE_SHEET_ID } = require("./config/config");
 const { Markup } = require("telegraf");
 const {
   appendToSheet,
-  updateStartDateById,
+  updateStartDateById
 } = require("./services/googleSheets");
 
 let calendar;
@@ -265,14 +265,15 @@ const initializeCalendar = (bot) => {
       { length: 9 },
       (_, i) => (i + 9).toString().padStart(2, "0") + ":00"
     );
-    const keyboard = hours.map((hour) =>
-      Markup.button.callback(hour, `time_${hour}`)
-    );
+      const keyboard = hours.map((hour) =>
+          Markup.button.callback(hour, `time_${hour}`)
+      );
 
-    const inlineKeyboard = [];
-    for (let i = 0; i < keyboard.length; i += 3) {
-      inlineKeyboard.push(keyboard.slice(i, i + 3));
-    }
+// Split the keyboard into chunks of 3
+      const inlineKeyboard = [];
+      for (let i = 0; i < keyboard.length; i += 3) {
+          inlineKeyboard.push(keyboard.slice(i, i + 3)); // Slice every 3 buttons
+      }
 
     // Send a reply if selectTime is set
     if (ctx.session.selectTime) {
@@ -283,71 +284,91 @@ const initializeCalendar = (bot) => {
     }
 
     // Listen for time selection
-    bot.action(/^time_(\d{2}:\d{2})$/, async (ctx) => {
-      const selectedTime = ctx.match[1];
+      bot.action(/^time_(\d{2}:\d{2})$/, async (ctx) => {
+          const selectedTime = ctx.match[1];
 
-      // Assign selected time and date for the meeting
-      ctx.session.startTime = selectedTime;
-      ctx.session.dateToMeet = date; // Set dateToMeet separately
+          // Format current date to store in session
+          const currentDate = new Date(); // Get current date
+          const formattedDate = `${currentDate.getDate()}-${currentDate.getMonth() + 1}-${currentDate.getFullYear()}`; // Format the date
 
-      await ctx.answerCbQuery();
-      await ctx.reply(ctx.i18n.t("questionnaire.selected_date"), {
-        parse_mode: "HTML",
-        reply_markup: Markup.keyboard([
-          [
-            Markup.button.text(ctx.i18n.t("main_menu.select_job")),
-            Markup.button.text(ctx.i18n.t("main_menu.view_all_jobs")),
-          ],
-          [
-            Markup.button.text(ctx.i18n.t("main_menu.contact_recruiter")),
-            Markup.button.text(ctx.i18n.t("main_menu.submit_application")),
-          ],
-          [Markup.button.text(ctx.i18n.t("main_menu.change_language"))],
-        ]).oneTime().reply_markup,
-      });
+          // Assign the selected time and date for the meeting
+          ctx.session.startTime = selectedTime;
+          ctx.session.dateToMeet = formattedDate; // Store the formatted date
 
-      const recruiterUsername = -1002380136376;
-      if (ctx.session.applying && ctx.session.selectTime) {
-        const messageToRecruiter = `📢 Новий кандидат подав заявку на вакансію:
-    📝 Назва вакансії: ${
-      ctx.session.selectedVacancy.title || ctx.session.selectedVacancy[0] ||   ctx.session.selectedVacancy.vacancyTitle  || ""
-    }, ${ctx.session.selectedVacancy.location || ctx.session.selectedVacancy[4] ||  ctx.session.selectedVacancy.vacancyLocation }
-    👤 Ім'я: ${ctx.session.fullName}, @${ctx.from.username}
-    📞 Номер телефону: ${ctx.session.phoneNumber}
-    🚚 Готовність до переїзду: ${ctx.session.relocationReadiness}
-    📅 Готовий почати з: ${ctx.session.startDate}
-    📅 Дата та час для зв'язку: ${ctx.session.dateToMeet}, ${selectedTime}
+          // Acknowledge the callback query to remove loading state
+          await ctx.answerCbQuery();
+
+          // Send the next step with custom buttons
+          await ctx.reply(ctx.i18n.t("questionnaire.selected_date"), {
+              parse_mode: "HTML",
+              reply_markup: Markup.keyboard([
+                  [
+                      Markup.button.text(ctx.i18n.t("main_menu.select_job")),
+                      Markup.button.text(ctx.i18n.t("main_menu.view_all_jobs")),
+                  ],
+                  [
+                      Markup.button.text(ctx.i18n.t("main_menu.contact_recruiter")),
+                      Markup.button.text(ctx.i18n.t("main_menu.submit_application")),
+                  ],
+                  [Markup.button.text(ctx.i18n.t("main_menu.change_language"))],
+              ])
+                  .oneTime() // Makes the keyboard disappear after use
+                  .reply_markup,
+          });
+
+          // Check if the application process is active and time has been selected
+          const recruiterUsername = -1002380136376;
+          if (ctx.session.applying && ctx.session.selectTime) {
+              // Prepare message to send to recruiter
+              const messageToRecruiter = `📢 Новий кандидат подав заявку на вакансію:
+📝 Назва вакансії: ${
+                  ctx.session.selectedVacancy.title || ctx.session.selectedVacancy[0] || ctx.session.selectedVacancy.vacancyTitle || ""
+              }, ${ctx.session.selectedVacancy.location || ctx.session.selectedVacancy[4] || ctx.session.selectedVacancy.vacancyLocation}
+👤 Ім'я: ${ctx.session.fullName}, @${ctx.from.username}
+📞 Номер телефону: ${ctx.session.phoneNumber}
+🚚 Готовність до переїзду: ${ctx.session.relocationReadiness}
+📅 Готовий почати з: ${ctx.session.startDate}
+📅 Дата та час для зв'язку: ${ctx.session.dateToMeet}, ${selectedTime}
 `;
-        await ctx.telegram.sendMessage(recruiterUsername, messageToRecruiter);
 
-        // Debugging message
-        console.log("Message sent to recruiter:", messageToRecruiter);
+              // Send message to recruiter
+              await ctx.telegram.sendMessage(recruiterUsername, messageToRecruiter);
 
-        await ctx.reply(ctx.i18n.t("application.application_received"), {
-          parse_mode: "HTML",
-          reply_markup: Markup.keyboard([
-            [
-              Markup.button.text(ctx.i18n.t("main_menu.select_job")),
-              Markup.button.text(ctx.i18n.t("main_menu.view_all_jobs")),
-            ],
-            [
-              Markup.button.text(ctx.i18n.t("main_menu.contact_recruiter")),
-              Markup.button.text(ctx.i18n.t("main_menu.submit_application")),
-            ],
-            [Markup.button.text(ctx.i18n.t("main_menu.change_language"))],
-          ]).oneTime().reply_markup,
-        });
+              // Debugging message
+              console.log("Message sent to recruiter:", messageToRecruiter);
 
-        ctx.session.applying = false;
-        ctx.session.skipped = false;
-        delete ctx.session.selectedVacancy;
-        delete ctx.session.fullName;
-        delete ctx.session.phoneNumber;
-        delete ctx.session.relocationReadiness;
-        delete ctx.session.startTime;
-        // Optionally retain startDate if needed
-        return;
-      }
+              // Send acknowledgment to user
+              await ctx.reply(ctx.i18n.t("application.application_received"), {
+                  parse_mode: "HTML",
+                  reply_markup: Markup.keyboard([
+                      [
+                          Markup.button.text(ctx.i18n.t("main_menu.select_job")),
+                          Markup.button.text(ctx.i18n.t("main_menu.view_all_jobs")),
+                      ],
+                      [
+                          Markup.button.text(ctx.i18n.t("main_menu.contact_recruiter")),
+                          Markup.button.text(ctx.i18n.t("main_menu.submit_application")),
+                      ],
+                      [Markup.button.text(ctx.i18n.t("main_menu.change_language"))],
+                  ])
+                      .oneTime()
+                      .reply_markup,
+              });
+
+              // Reset the session flags after the application is completed
+              ctx.session.applying = false;
+              ctx.session.skipped = false;
+              delete ctx.session.selectedVacancy;
+              delete ctx.session.fullName;
+              delete ctx.session.phoneNumber;
+              delete ctx.session.relocationReadiness;
+              delete ctx.session.startTime;
+              delete ctx.session.dateToMeet;
+              // Optionally, retain startDate if needed
+
+              return;
+          }
+
 
       const {
         fullName,
@@ -377,11 +398,12 @@ const initializeCalendar = (bot) => {
       ];
 
       if (!ctx.session.applying && ctx.session.selectTime) {
+
         const messageToRecruiter = !ctx.session.skipped
           ? `📋 Нові дані про кандидата:\n
 - 👤 Повне ім'я: ${fullName}, @${ctx.from.username}
 - 📞 Номер телефону: ${phoneNumber}
-- 🎂 Вік: ${age}
+- 🎂 Вік: ${age} 
 - 🏳️ Громадянство: ${citizenship}\n
 - 📄 Документ в Польщі: ${document}
 - 🌆 Місто пошуку роботи: ${city}, Готовий до переїзду: ${relocate}
