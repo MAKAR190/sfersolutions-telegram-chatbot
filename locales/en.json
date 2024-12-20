@@ -47,7 +47,9 @@
     "no": "No ❌",
     "skip_questionnaire": "<b>Do you want to skip the questionnaire?</b> You have already submitted a form. 🤷‍♂️",
     "skip_success": "<b>When do you want to meet your recruiter?</b> 📅",
-    "select_time": "<b>Please select a time for starting a discussion:</b>"
+    "select_time": "<b>Please select a time for starting a discussion:</b>",
+    "ask_preferred_date": "Please, type your prefered date so we could contact you: ",
+    "ask_preferred_time": "Please, type your prefered time when we could contact you: "
   },
   "go_back": "🔙 Go back",
   "cancel": "❌ Cancel",

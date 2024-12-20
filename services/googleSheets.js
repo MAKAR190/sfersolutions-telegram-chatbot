@@ -848,7 +848,8 @@ const notifySubscribers = async (bot, SHEET_ID) => {
           }
 
           // Ensure that the index exists in the vacancies list
-          ctx.session.selectedVacancy = vacancies[vacancyIndex + 1]; // +1 because the first row is headers
+          ctx.session.selectedVacancy = vacancies[vacancyIndex + 4];
+          console.log( ctx.session.selectedVacancy)// +1 because the first row is headers
           // Pass the selected vacancy directly to the next scene
           await ctx.answerCbQuery(); // Acknowledge the callback query
           ctx.scene.enter("applyScene"); // Pass selected vacancy data to the scene
