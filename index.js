@@ -101,10 +101,10 @@ bot.use((ctx, next) => {
 });
 
 
-cron.schedule('* * * * *', async () => {
-    console.log('Running scheduled job to notify subscribers...');
-    await notifySubscribers(bot, GOOGLE_SHEET_ID);
-});
+// cron.schedule('* * * * *', async () => {
+//     console.log('Running scheduled job to notify subscribers...');
+//     await notifySubscribers(bot, GOOGLE_SHEET_ID);
+// });
 
 
 
